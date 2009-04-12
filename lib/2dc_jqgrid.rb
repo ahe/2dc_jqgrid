@@ -25,14 +25,14 @@ module ActionView
       options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
       options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
       options[:inline_edit] = (options[:inline_edit].blank?) ? "false" : options[:inline_edit].to_s
-      edit_button = (options[:edit] == true && options[:inline_edit] == "false") ? "true" : "false"      
+      edit_button = (options[:edit] == true && options[:inline_edit] == "false") ? "true" : "false"
 
       # Generate columns data
       col_names = "[" # Labels
       col_model = "[" # Options
       columns.each do |c|
         col_names << "'#{c[:label]}',"
-        col_model << "{name:'#{c[:field]}', index:'#{c[:field]}',#{get_attributes(c)}},"
+        col_model << "{name:'#{c[:field]}', index:'#{c[:field]}'#{get_attributes(c)}},"
       end
       col_names.chop! << "]"
       col_model.chop! << "]"
@@ -174,7 +174,7 @@ module ActionView
 
     # Generate a list of attributes for related column (align:'right', sortable:true, resizable:false, ...)
     def get_attributes(column)
-      options = ""
+      options = ","
       column.except(:field, :label).each do |couple|
         if couple[0] == :editoptions
           options << "editoptions:#{get_edit_options(couple[1])},"
