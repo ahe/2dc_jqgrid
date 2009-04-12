@@ -25,7 +25,7 @@ module ActionView
       options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
       options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
       options[:inline_edit] = (options[:inline_edit].blank?) ? "false" : options[:inline_edit].to_s
-      edit_button = (options[:edit] == "true" && options[:inline_edit] == "false") ? "true" : "false"
+      edit_button = (options[:edit] == true && options[:inline_edit] == "false") ? "true" : "false"      
 
       # Generate columns data
       col_names = "[" # Labels
@@ -39,7 +39,7 @@ module ActionView
 
       # Enable multi-selection (checkboxes)
       multiselect = ""
-      if options[:multi_select]
+      if options[:multi_selection]
         multiselect = %Q/multiselect: true,/
         multihandler = %Q/
           jQuery("##{id}_select_button").click( function() { 
@@ -55,16 +55,16 @@ module ActionView
           onSelectRow: function(ids) { 
             if(ids == null) { 
               ids=0; 
-              if(jQuery("##{id}_d").getGridParam('records') >0 ) 
+              if(jQuery("##{id}_details").getGridParam('records') >0 ) 
               { 
-                jQuery("##{id}_d").setGridParam({url:"#{options[:details_url]}?q=1&id="+ids,page:1})
+                jQuery("##{id}_details").setGridParam({url:"#{options[:details_url]}?q=1&id="+ids,page:1})
                 .setCaption("#{options[:details_caption]}: "+ids)
                 .trigger('reloadGrid'); 
               } 
             } 
             else 
             { 
-              jQuery("##{id}_d").setGridParam({url:"#{options[:details_url]}?q=1&id="+ids,page:1})
+              jQuery("##{id}_details").setGridParam({url:"#{options[:details_url]}?q=1&id="+ids,page:1})
               .setCaption("#{options[:details_caption]} : "+ids)
               .trigger('reloadGrid'); 
             } 
@@ -74,7 +74,7 @@ module ActionView
       # Enable selection link, button
       # The javascript function created by the user (options[:selection_handler]) will be called with the selected row id as a parameter
       selection_link = ""
-      if options[:direct_selection].blank? && options[:selection_handler].present? && options[:multi_select].blank?
+      if (options[:direct_selection].blank? || options[:direct_selection] == false) && options[:selection_handler].present? && (options[:multi_selection].blank? || options[:multi_selection] == false)
         selection_link = %Q/
         jQuery("##{id}_select_button").click( function(){ 
           var id = jQuery("##{id}").getGridParam('selrow'); 
@@ -89,7 +89,7 @@ module ActionView
       # Enable direct selection (when a row in the table is clicked)
       # The javascript function created by the user (options[:selection_handler]) will be called with the selected row id as a parameter
       direct_link = ""
-      if options[:direct_selection] && options[:selection_handler].present? && options[:multi_select].blank?
+      if options[:direct_selection] && options[:selection_handler].present? && options[:multi_selection].blank?
         direct_link = %Q/
         onSelectRow: function(id){ 
           if(id){ 
