@@ -6,6 +6,3 @@ FileUtils.cp_r(
   File.join(RAILS_ROOT),
   :verbose => true
 )
- 
-# Show the README text file
-puts IO.read(File.join(File.dirname(__FILE__), 'README')
