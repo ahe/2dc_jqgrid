@@ -1,0 +1,1 @@
+require '2dc_jqgrid'

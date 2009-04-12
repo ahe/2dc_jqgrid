@@ -1,0 +1,27 @@
+2dcJqgrid
+=========
+
+This Rails plugin allows you to add jQuery datagrids into your applications.
+
+Following features are supported :
+
+- Ajax enabled
+- Sorting
+- Pagination
+- Search
+- CRUD operations (add, edit, delete)
+- Multi-selection (checkboxes)
+- Master-details
+- Themes
+- And more ...
+
+Documentation & live demo are available at http://www.2dconcept.com/jquery-grid-rails-plugin.html
+
+Enjoy!
+
+
+
+Copyright (c) 2009 Anthony Heukmes, released under the MIT license
+
+My Rails blog : http://2dconcept.com
+My Twitter account : http://twitter.com/2dc
