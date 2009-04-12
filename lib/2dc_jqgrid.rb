@@ -1,6 +1,19 @@
 module ActionView
 
   module Helpers
+    
+    def jqgrid_stylesheets
+      css = capture { stylesheet_link_tag 'jqgrid/ui.all' }
+      css << capture { stylesheet_link_tag 'jqgrid/ui.jqgrid' }    
+    end
+
+    def jqgrid_javascripts
+      js = capture { javascript_include_tag 'jqgrid/jquery' }
+      js << capture { javascript_include_tag 'jqgrid/jquery.ui.all' }
+      js << capture { javascript_include_tag 'jqgrid/jquery.layout' }
+      js << capture { javascript_include_tag 'jqgrid/jqModal' }
+      js << capture { javascript_include_tag 'jqgrid/jquery.jqGrid' }
+    end
 
     def jqgrid(title, id, action, columns = {}, options = {})
 
@@ -110,7 +123,7 @@ module ActionView
         },/
       end
 
-      # Generate required Javascript to create the jqgrid
+      # Generate required Javascript & html to create the jqgrid
       %Q(
         <script type="text/javascript">
         var lastsel;
@@ -152,6 +165,8 @@ module ActionView
         });
         });
         </script>
+        <table id="#{id}" class="scroll" cellpadding="0" cellspacing="0"></table>
+        <div id="#{id}_pager" class="scroll" style="text-align:center;"></div>
       )
     end
 
