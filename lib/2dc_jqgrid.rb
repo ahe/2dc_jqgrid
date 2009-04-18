@@ -38,6 +38,7 @@ module ActionView
           jQuery("##{id}_select_button").click( function() { 
             var s; s = jQuery("##{id}").getGridParam('selarrrow'); 
             #{options[:selection_handler]}(s); 
+            return false;
           });/
       end
 
@@ -75,7 +76,8 @@ module ActionView
             #{options[:selection_handler]}(id); 
           } else { 
             alert("Please select a row");
-          } 
+          }
+          return false; 
         });/
       end
 
