@@ -222,7 +222,9 @@ module JqgridJson
       json << %Q({"id":"#{elem.id}","cell":[)
       couples = elem.attributes.symbolize_keys
       attributes.each do |atr|
-        json << %Q("#{couples[atr]}",)
+        value = couples[atr]
+        value = elem.try(atr) if value.blank?
+        json << %Q("#{value}",)
       end
       json.chop! << "]},"
     end
