@@ -115,6 +115,42 @@ module ActionView
           } 
         },/
       end
+      
+      # Enable subgrids
+      subgrid = ""
+      subgrid_enabled = "subGrid:false,"
+      if options[:subgrid]
+        subgrid_enabled = "subGrid:true,"
+        options[:subgrid][:rows_per_page] = "10" if options[:subgrid][:rows_per_page].blank?
+        options[:subgrid][:sort_column] = "id" if options[:subgrid][:sort_column].blank?
+        options[:subgrid][:sort_order] = "asc" if options[:subgrid][:sort_order].blank?
+        subgrid_search = (options[:subgrid][:search].blank?) ? "false" : options[:subgrid][:search]
+        sub_col_names, sub_col_model = gen_columns(options[:subgrid][:columns])
+        
+        subgrid = %Q(
+        subGridRowExpanded: function(subgrid_id, row_id) {
+        		var subgrid_table_id, pager_id;
+        		subgrid_table_id = subgrid_id+"_t";
+        		pager_id = "p_"+subgrid_table_id;
+        		$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+        		jQuery("#"+subgrid_table_id).jqGrid({
+        			url:"#{options[:subgrid][:url]}?q=2&id="+row_id,
+        			datatype: "json",
+        			colNames: #{sub_col_names},
+        			colModel: #{sub_col_model},
+        		   	rowNum:#{options[:subgrid][:rows_per_page]},
+        		   	pager: pager_id,
+        		   	imgpath: '/images/themes/lightness/images',
+        		   	sortname: '#{options[:subgrid][:sort_column]}',
+        		    sortorder: '#{options[:subgrid][:sort_order]}',
+        		    height: '100%'
+        		})
+        		.navGrid("#"+pager_id,{edit:false,add:false,del:false,search:#{subgrid_search}})
+        	},
+        	subGridRowColapsed: function(subgrid_id, row_id) {
+        	},
+        )
+      end
 
       # Generate required Javascript & html to create the jqgrid
       %Q(
@@ -141,6 +177,8 @@ module ActionView
             #{grid_loaded}
             #{direct_link}
             #{editable}
+            #{subgrid_enabled}
+            #{subgrid}
             caption: "#{title}"
         });
         jQuery("#t_#{id}").height(25).hide().filterGrid("#{id}",{gridModel:true,gridToolbar:true});
