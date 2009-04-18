@@ -28,14 +28,7 @@ module ActionView
       edit_button = (options[:edit] == true && options[:inline_edit] == "false") ? "true" : "false"
 
       # Generate columns data
-      col_names = "[" # Labels
-      col_model = "[" # Options
-      columns.each do |c|
-        col_names << "'#{c[:label]}',"
-        col_model << "{name:'#{c[:field]}', index:'#{c[:field]}'#{get_attributes(c)}},"
-      end
-      col_names.chop! << "]"
-      col_model.chop! << "]"
+      col_names, col_model = gen_columns(columns)
 
       # Enable multi-selection (checkboxes)
       multiselect = ""
@@ -171,6 +164,19 @@ module ActionView
     end
 
     private
+    
+    def gen_columns(columns)
+      # Generate columns data
+      col_names = "[" # Labels
+      col_model = "[" # Options
+      columns.each do |c|
+        col_names << "'#{c[:label]}',"
+        col_model << "{name:'#{c[:field]}', index:'#{c[:field]}'#{get_attributes(c)}},"
+      end
+      col_names.chop! << "]"
+      col_model.chop! << "]"
+      [col_names, col_model]
+    end
 
     # Generate a list of attributes for related column (align:'right', sortable:true, resizable:false, ...)
     def get_attributes(column)
