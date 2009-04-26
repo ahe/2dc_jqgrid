@@ -312,7 +312,7 @@ module JqgridJson
       couples = elem.attributes.symbolize_keys
       attributes.each do |atr|
         value = couples[atr]
-        value = elem.try(atr) if value.blank?
+        value = elem.try(atr) if elem.respond_to? :try && value.blank?
         json << %Q("#{value}",)
       end
       json.chop! << "]},"
