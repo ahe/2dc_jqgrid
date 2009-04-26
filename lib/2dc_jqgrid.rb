@@ -127,6 +127,34 @@ module ActionView
         options[:subgrid][:sort_column] = "id" if options[:subgrid][:sort_column].blank?
         options[:subgrid][:sort_order] = "asc" if options[:subgrid][:sort_order].blank?
         subgrid_search = (options[:subgrid][:search].blank?) ? "false" : options[:subgrid][:search]
+        options[:subgrid][:add] = (options[:subgrid][:add].blank?) ? "false" : options[:subgrid][:add].to_s    
+        options[:subgrid][:delete] = (options[:subgrid][:delete].blank?) ? "false" : options[:subgrid][:delete].to_s
+        options[:subgrid][:edit] = (options[:subgrid][:edit].blank?) ? "false" : options[:subgrid][:edit].to_s   
+        
+        subgrid_inline_edit = ""
+        if options[:subgrid][:inline_edit] == true
+          options[:subgrid][:edit] = "false"
+          subgrid_inline_edit = %Q/
+          onSelectRow: function(id){ 
+            if(id && id!==lastsel){ 
+              jQuery('#'+subgrid_table_id).restoreRow(lastsel);
+              jQuery('#'+subgrid_table_id).editRow(id,true); 
+              lastsel=id; 
+            } 
+          },
+          /
+        end
+          
+        if options[:subgrid][:direct_selection] && options[:subgrid][:selection_handler].present?
+          subgrid_direct_link = %Q/
+          onSelectRow: function(id){ 
+            if(id){ 
+              #{options[:subgrid][:selection_handler]}(id); 
+            } 
+          },
+          /
+        end     
+        
         sub_col_names, sub_col_model = gen_columns(options[:subgrid][:columns])
         
         subgrid = %Q(
@@ -137,6 +165,7 @@ module ActionView
         		$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
         		jQuery("#"+subgrid_table_id).jqGrid({
         			url:"#{options[:subgrid][:url]}?q=2&id="+row_id,
+              editurl:'#{options[:subgrid][:edit_url]}',
         			datatype: "json",
         			colNames: #{sub_col_names},
         			colModel: #{sub_col_model},
@@ -145,9 +174,23 @@ module ActionView
         		   	imgpath: '/images/themes/lightness/images',
         		   	sortname: '#{options[:subgrid][:sort_column]}',
         		    sortorder: '#{options[:subgrid][:sort_order]}',
+                viewrecords: true,
+                toolbar : [true,"top"], 
+        		    #{subgrid_inline_edit}
+        		    #{subgrid_direct_link}
         		    height: '100%'
         		})
-        		.navGrid("#"+pager_id,{edit:false,add:false,del:false,search:#{subgrid_search}})
+        		.navGrid("#"+pager_id,{edit:#{options[:subgrid][:edit]},add:#{options[:subgrid][:add]},del:#{options[:subgrid][:delete]},search:false})
+        		.navButtonAdd("#"+pager_id,{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
+            	onClickButton:function(){ 
+            		if(jQuery("#t_"+subgrid_table_id).css("display")=="none") {
+            			jQuery("#t_"+subgrid_table_id).css("display","");
+            		} else {
+            			jQuery("#t_"+subgrid_table_id).css("display","none");
+            		}
+            	} 
+            });
+            jQuery("#t_"+subgrid_table_id).height(25).hide().filterGrid(""+subgrid_table_id,{gridModel:true,gridToolbar:true});
         	},
         	subGridRowColapsed: function(subgrid_id, row_id) {
         	},
