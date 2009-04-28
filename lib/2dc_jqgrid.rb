@@ -165,7 +165,7 @@ module ActionView
         		$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
         		jQuery("#"+subgrid_table_id).jqGrid({
         			url:"#{options[:subgrid][:url]}?q=2&id="+row_id,
-              editurl:'#{options[:subgrid][:edit_url]}',
+              editurl:'#{options[:subgrid][:edit_url]}?parent_id='+row_id,                            
         			datatype: "json",
         			colNames: #{sub_col_names},
         			colModel: #{sub_col_model},
