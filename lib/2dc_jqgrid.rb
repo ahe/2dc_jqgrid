@@ -21,6 +21,7 @@ module ActionView
       options[:rows_per_page] = "10" if options[:rows_per_page].blank?
       options[:sort_column] = "id" if options[:sort_column].blank?
       options[:sort_order] = "asc" if options[:sort_order].blank?
+      options[:height] = "150" if options[:height].blank?
 
       options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
       options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
@@ -215,6 +216,7 @@ module ActionView
             imgpath: '/images/themes/lightness/images',
             sortname: '#{options[:sort_column]}',
             viewrecords: true,
+            height: #{options[:height]},            
             toolbar : [true,"top"], 
             sortorder: '#{options[:sort_order]}',
             #{multiselect}
