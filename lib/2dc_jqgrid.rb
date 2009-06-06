@@ -113,7 +113,7 @@ module ActionView
         onSelectRow: function(id){ 
           if(id && id!==lastsel){ 
             jQuery('##{id}').restoreRow(lastsel);
-            jQuery('##{id}').editRow(id,true); 
+            jQuery('##{id}').editRow(id, true, null, afterSubmit);
             lastsel=id; 
           } 
         },/
@@ -231,7 +231,11 @@ module ActionView
         jQuery("#t_#{id}").height(25).hide().filterGrid("#{id}",{gridModel:true,gridToolbar:true});
         #{multihandler}
         #{selection_link}
-        jQuery("##{id}").navGrid('##{id}_pager',{edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true})
+        jQuery("##{id}").navGrid('##{id}_pager',{edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
+        {afterSubmit:function(r,data){return afterSubmit(r,data,'edit');}},
+        {afterSubmit:function(r,data){return afterSubmit(r,data,'add');}},
+        {afterSubmit:function(r,data){return afterSubmit(r,data,'delete');}
+        })
         .navButtonAdd("##{id}_pager",{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
         	onClickButton:function(){ 
         		if(jQuery("#t_#{id}").css("display")=="none") {
