@@ -22,6 +22,8 @@ module ActionView
       options[:sort_column] = "id" if options[:sort_column].blank?
       options[:sort_order] = "asc" if options[:sort_order].blank?
       options[:height] = "150" if options[:height].blank?
+      options[:error_handler] = 'null' if options[:error_handler].blank?      
+      options[:inline_edit_handler] = 'null' if options[:inline_edit_handler].blank?
 
       options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
       options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
@@ -113,7 +115,7 @@ module ActionView
         onSelectRow: function(id){ 
           if(id && id!==lastsel){ 
             jQuery('##{id}').restoreRow(lastsel);
-            jQuery('##{id}').editRow(id, true, null, afterSubmit);
+            jQuery('##{id}').editRow(id, true, #{options[:inline_edit_handler]}, #{options[:error_handler]});
             lastsel=id; 
           } 
         },/
@@ -232,9 +234,9 @@ module ActionView
         #{multihandler}
         #{selection_link}
         jQuery("##{id}").navGrid('##{id}_pager',{edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
-        {afterSubmit:function(r,data){return afterSubmit(r,data,'edit');}},
-        {afterSubmit:function(r,data){return afterSubmit(r,data,'add');}},
-        {afterSubmit:function(r,data){return afterSubmit(r,data,'delete');}
+        {afterSubmit:function(r,data){return #{options[:error_handler]}(r,data,'edit');}},
+        {afterSubmit:function(r,data){return #{options[:error_handler]}(r,data,'add');}},
+        {afterSubmit:function(r,data){return #{options[:error_handler]}(r,data,'delete');}
         })
         .navButtonAdd("##{id}_pager",{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
         	onClickButton:function(){ 
