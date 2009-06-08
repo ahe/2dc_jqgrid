@@ -25,6 +25,7 @@ module ActionView
       options[:error_handler] = 'null' if options[:error_handler].blank?      
       options[:error_handler_return_value] = options[:error_handler]
       options[:error_handler_return_value] = "true;" if options[:error_handler_return_value] == 'null'
+      options[:inline_edit_handler] = 'null' if options[:inline_edit_handler].blank?      
 
       options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
       options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
