@@ -249,7 +249,7 @@ module Jqgrid
             colModel:#{col_model},
             pager: '##{id}_pager',
             rowNum:#{options[:rows_per_page]},
-            rowList:[10,25,50,100,500],
+            rowList:[10,25,50,100],
             imgpath: '/images/themes/lightness/images',
             sortname: '#{options[:sort_column]}',
             viewrecords: true,
