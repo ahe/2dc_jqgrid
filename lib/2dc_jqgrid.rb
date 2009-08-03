@@ -1,44 +1,66 @@
-module ActionView
-
-  module Helpers
+module Jqgrid
     
     def jqgrid_stylesheets
-      css = capture { stylesheet_link_tag 'jqgrid/ui.all' }
-      css << capture { stylesheet_link_tag 'jqgrid/ui.jqgrid' }    
+      css = %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid/jquery-ui-1.7.1.custom.css" />\n)
+      css << %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid//ui.jqgrid.css" />)
     end
 
     def jqgrid_javascripts
-      js = capture { javascript_include_tag 'jqgrid/jquery' }
-      js << capture { javascript_include_tag 'jqgrid/jquery.ui.all' }
-      js << capture { javascript_include_tag 'jqgrid/jquery.layout' }
-      js << capture { javascript_include_tag 'jqgrid/jqModal' }
-      js << capture { javascript_include_tag 'jqgrid/jquery.jqGrid' }
+      js = %Q(<script src="/jqgrid/js/jquery.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/jquery.layout.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/i18n/grid.locale-en.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/jquery.tablednd.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/jquery.contextmenu.js" type="text/javascript"></script>)                    
     end
 
-    def jqgrid(title, id, action, columns = {}, options = {})
-
+    def jqgrid(title, id, action, columns = [], options = {})
+      
       # Default options
-      options[:rows_per_page] = "10" if options[:rows_per_page].blank?
-      options[:sort_column] = "id" if options[:sort_column].blank?
-      options[:sort_order] = "asc" if options[:sort_order].blank?
-      options[:height] = "150" if options[:height].blank?
-      options[:error_handler] = 'null' if options[:error_handler].blank?      
-      options[:error_handler_return_value] = options[:error_handler]
-      options[:error_handler_return_value] = "true;" if options[:error_handler_return_value] == 'null'
-      options[:inline_edit_handler] = 'null' if options[:inline_edit_handler].blank?      
-
-      options[:add] = (options[:add].blank?) ? "false" : options[:add].to_s    
-      options[:delete] = (options[:delete].blank?) ? "false" : options[:delete].to_s
-      options[:inline_edit] = (options[:inline_edit].blank?) ? "false" : options[:inline_edit].to_s
-      edit_button = (options[:edit] == true && options[:inline_edit] == "false") ? "true" : "false"
+      options = 
+        { 
+          :rows_per_page       => '10',
+          :sort_column         => '',
+          :sort_order          => '',
+          :height              => '150',
+          :gridview            => 'false',
+          :error_handler       => 'null',
+          :inline_edit_handler => 'null',
+          :add                 => 'false',
+          :delete              => 'false',
+          :search              => 'true',
+          :edit                => 'false',          
+          :inline_edit         => 'false',
+          :autowidth           => 'false',
+          :rownumbers          => 'false'                    
+        }.merge(options)
+      
+      # Stringify options values
+      options.inject({}) do |options, (key, value)|
+        options[key] = (key != :subgrid) ? value.to_s : value
+        options
+      end
+      
+      options[:error_handler_return_value] = (options[:error_handler] == 'null') ? 'true;' : options[:error_handler]
+      edit_button = (options[:edit] == 'true' && options[:inline_edit] == 'false').to_s
 
       # Generate columns data
       col_names, col_model = gen_columns(columns)
 
+      # Enable filtering (by default)
+      search = ""
+      filter_toolbar = ""
+      if options[:search] == 'true'
+        search = %Q/.navButtonAdd("##{id}_pager",{caption:"",title:"Toggle Search Toolbar", buttonicon :'ui-icon-search', onClickButton:function(){ mygrid[0].toggleToolbar() } })/
+        filter_toolbar = "mygrid.filterToolbar();"
+        filter_toolbar << "mygrid[0].toggleToolbar()"
+      end
+
       # Enable multi-selection (checkboxes)
-      multiselect = ""
+      multiselect = "multiselect: false,"
       if options[:multi_selection]
-        multiselect = %Q/multiselect: true,/
+        multiselect = "multiselect: true,"
         multihandler = %Q/
           jQuery("##{id}_select_button").click( function() { 
             var s; s = jQuery("##{id}").getGridParam('selarrrow'); 
@@ -73,7 +95,7 @@ module ActionView
       # Enable selection link, button
       # The javascript function created by the user (options[:selection_handler]) will be called with the selected row id as a parameter
       selection_link = ""
-      if (options[:direct_selection].blank? || options[:direct_selection] == false) && options[:selection_handler].present? && (options[:multi_selection].blank? || options[:multi_selection] == false)
+      if options[:direct_selection].blank? && options[:selection_handler].present? && options[:multi_selection].blank?
         selection_link = %Q/
         jQuery("##{id}_select_button").click( function(){ 
           var id = jQuery("##{id}").getGridParam('selrow'); 
@@ -112,7 +134,7 @@ module ActionView
       # Enable inline editing
       # When a row is selected, all fields are transformed to input types
       editable = ""
-      if options[:edit] && options[:inline_edit] == "true"
+      if options[:edit] && options[:inline_edit] == 'true'
         editable = %Q/
         onSelectRow: function(id){ 
           if(id && id!==lastsel){ 
@@ -126,19 +148,31 @@ module ActionView
       # Enable subgrids
       subgrid = ""
       subgrid_enabled = "subGrid:false,"
-      if options[:subgrid]
+
+      if options[:subgrid].present?
+        
         subgrid_enabled = "subGrid:true,"
-        options[:subgrid][:rows_per_page] = "10" if options[:subgrid][:rows_per_page].blank?
-        options[:subgrid][:sort_column] = "id" if options[:subgrid][:sort_column].blank?
-        options[:subgrid][:sort_order] = "asc" if options[:subgrid][:sort_order].blank?
-        subgrid_search = (options[:subgrid][:search].blank?) ? "false" : options[:subgrid][:search]
-        options[:subgrid][:add] = (options[:subgrid][:add].blank?) ? "false" : options[:subgrid][:add].to_s    
-        options[:subgrid][:delete] = (options[:subgrid][:delete].blank?) ? "false" : options[:subgrid][:delete].to_s
-        options[:subgrid][:edit] = (options[:subgrid][:edit].blank?) ? "false" : options[:subgrid][:edit].to_s   
+        
+        options[:subgrid] = 
+          {
+            :rows_per_page => '10',
+            :sort_column   => 'id',
+            :sort_order    => 'asc',
+            :add           => 'false',
+            :edit          => 'false',
+            :delete        => 'false',
+            :search        => 'false'
+          }.merge(options[:subgrid])
+
+        # Stringify options values
+        options[:subgrid].inject({}) do |suboptions, (key, value)|
+          suboptions[key] = value.to_s
+          suboptions
+        end
         
         subgrid_inline_edit = ""
         if options[:subgrid][:inline_edit] == true
-          options[:subgrid][:edit] = "false"
+          options[:subgrid][:edit] = 'false'
           subgrid_inline_edit = %Q/
           onSelectRow: function(id){ 
             if(id && id!==lastsel){ 
@@ -207,22 +241,24 @@ module ActionView
         <script type="text/javascript">
         var lastsel;
         jQuery(document).ready(function(){
-        jQuery("##{id}").jqGrid({
-            // adding ?nd='+new Date().getTime() prevent IE caching
-            url:'#{action}?nd='+new Date().getTime(),
+        var mygrid = jQuery("##{id}").jqGrid({
+            url:'#{action}?q=1',
             editurl:'#{options[:edit_url]}',
             datatype: "json",
             colNames:#{col_names},
             colModel:#{col_model},
-            pager: jQuery('##{id}_pager'),
+            pager: '##{id}_pager',
             rowNum:#{options[:rows_per_page]},
-            rowList:[10,25,50,100],
+            rowList:[10,25,50,100,500],
             imgpath: '/images/themes/lightness/images',
             sortname: '#{options[:sort_column]}',
             viewrecords: true,
-            height: #{options[:height]},            
-            toolbar : [true,"top"], 
+            height: #{options[:height]},
             sortorder: '#{options[:sort_order]}',
+            gridview: #{options[:gridview]},
+            scrollrows: true,
+            autowidth: #{options[:autowidth]},
+            rownumbers: #{options[:rownumbers]},
             #{multiselect}
             #{masterdetails}
             #{grid_loaded}
@@ -231,24 +267,16 @@ module ActionView
             #{subgrid_enabled}
             #{subgrid}
             caption: "#{title}"
-        });
-        jQuery("#t_#{id}").height(25).hide().filterGrid("#{id}",{gridModel:true,gridToolbar:true});
-        #{multihandler}
-        #{selection_link}
-        jQuery("##{id}").navGrid('##{id}_pager',{edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
+        })
+        .navGrid('##{id}_pager',
+        {edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
         {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'edit');}},
         {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'add');}},
-        {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'delete');}
-        })
-        .navButtonAdd("##{id}_pager",{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
-        	onClickButton:function(){ 
-        		if(jQuery("#t_#{id}").css("display")=="none") {
-        			jQuery("#t_#{id}").css("display","");
-        		} else {
-        			jQuery("#t_#{id}").css("display","none");
-        		}
-        	} 
-        });
+        {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'delete');}})
+        #{search}
+        #{multihandler}
+        #{selection_link}
+        #{filter_toolbar}
         });
         </script>
         <table id="#{id}" class="scroll" cellpadding="0" cellspacing="0"></table>
@@ -276,7 +304,13 @@ module ActionView
       options = ","
       column.except(:field, :label).each do |couple|
         if couple[0] == :editoptions
-          options << "editoptions:#{get_edit_options(couple[1])},"
+          options << "editoptions:#{get_sub_options(couple[1])},"
+        elsif couple[0] == :formoptions
+          options << "formoptions:#{get_sub_options(couple[1])},"
+        elsif couple[0] == :searchoptions
+          options << "searchoptions:#{get_sub_options(couple[1])},"
+        elsif couple[0] == :editrules
+          options << "editrules:#{get_sub_options(couple[1])},"
         else
           if couple[1].class == String
             options << "#{couple[0]}:'#{couple[1]}',"
@@ -289,7 +323,7 @@ module ActionView
     end
 
     # Generate options for editable fields (value, data, width, maxvalue, cols, rows, ...)
-    def get_edit_options(editoptions)
+    def get_sub_options(editoptions)
       options = "{"
       editoptions.each do |couple|
         if couple[0] == :value # :value => [[1, "Rails"], [2, "Ruby"], [3, "jQuery"]]
@@ -305,32 +339,57 @@ module ActionView
           end
           options.chop! << %Q/",/
         else # :size => 30, :rows => 5, :maxlength => 20, ...
-          options << %Q/#{couple[0]}:"#{couple[1]}",/
+          if couple[1].instance_of?(Fixnum) || couple[1] == 'true' || couple[1] == 'false' || couple[1] == true || couple[1] == false
+            options << %Q/#{couple[0]}:#{couple[1]},/
+          else
+            options << %Q/#{couple[0]}:"#{couple[1]}",/            
+          end
         end
       end
       options.chop! << "}"
     end 
-  end
 end
 
 
 module JqgridJson
   def to_jqgrid_json(attributes, current_page, per_page, total)
-    json = %Q({"page":"#{current_page}","total":#{total/per_page.to_i+1},"records":"#{total}","rows":[)
-    each do |elem|
-      json << %Q({"id":"#{elem.id}","cell":[)
-      couples = elem.attributes.symbolize_keys
-      attributes.each do |atr|
-        value = couples[atr]
-        value = elem.send(atr.to_sym) if elem.respond_to?(atr) && value.blank?
-        json << %Q("#{value}",)
+    json = %Q({"page":"#{current_page}","total":#{total/per_page.to_i+1},"records":"#{total}")
+    if total > 0
+      json << %Q(,"rows":[)
+      each do |elem|
+        elem.id ||= index(elem)
+        json << %Q({"id":"#{elem.id}","cell":[)
+        couples = elem.attributes.symbolize_keys
+        attributes.each do |atr|
+          value = get_atr_value(elem, atr, couples)
+          json << %Q("#{value}",)
+        end
+        json.chop! << "]},"
       end
-      json.chop! << "]},"
+      json.chop! << "]}"
+    else
+      json << "}"
     end
-    json.chop! << "]}"
   end
-end
-
-class Array
-  include JqgridJson
+  
+  private
+  
+  def get_atr_value(elem, atr, couples)
+    if atr.instance_of?(String) && atr.include?('.')
+      value = get_nested_atr_value(elem, atr.split('.').reverse) 
+    else
+      value = couples[atr]
+      value = elem.send(atr.to_sym) if value.blank? && elem.respond_to?(atr) # Required for virtual attributes
+    end
+    value
+  end
+  
+  def get_nested_atr_value(elem, hierarchy)
+    return nil if hierarchy.size == 0
+    atr = hierarchy.pop
+    raise ArgumentError, "#{atr} doesn't exist on #{elem.inspect}" unless elem.respond_to?(atr)
+    nested_elem = elem.send(atr)
+    value = get_nested_atr_value(nested_elem, hierarchy)
+    value.nil? ? nested_elem : value
+  end
 end
