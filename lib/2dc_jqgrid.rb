@@ -389,6 +389,7 @@ module JqgridJson
     atr = hierarchy.pop
     raise ArgumentError, "#{atr} doesn't exist on #{elem.inspect}" unless elem.respond_to?(atr)
     nested_elem = elem.send(atr)
+    return "" if nested_elem.nil?
     value = get_nested_atr_value(nested_elem, hierarchy)
     value.nil? ? nested_elem : value
   end

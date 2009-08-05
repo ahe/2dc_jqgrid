@@ -87,7 +87,12 @@ describe "to_jqgrid_json" do
     end
     json = @data.to_jqgrid_json([:id, :username, "parent.username", "parent.parent.username"], 1, 10, @data.size)
     json.should == "{\"page\":\"1\",\"total\":1,\"records\":\"5\",\"rows\":[{\"id\":\"1\",\"cell\":[\"1\",\"user_1\",\"Parent 1\",\"Parent Parent 1\"]},{\"id\":\"2\",\"cell\":[\"2\",\"user_2\",\"Parent 2\",\"Parent Parent 2\"]},{\"id\":\"3\",\"cell\":[\"3\",\"user_3\",\"Parent 3\",\"Parent Parent 3\"]},{\"id\":\"4\",\"cell\":[\"4\",\"user_4\",\"Parent 4\",\"Parent Parent 4\"]},{\"id\":\"5\",\"cell\":[\"5\",\"user_5\",\"Parent 5\",\"Parent Parent 5\"]}]}"
-  end 
+  end
+  
+  it "should return an empty string if the associated object is nil" do
+    json = @data.to_jqgrid_json([:id, "parent.username"], 1, 10, @data.size)
+    p json
+  end
   
 end
 
