@@ -1,5 +1,4 @@
 module Jqgrid
-    
     def jqgrid_stylesheets
       css = %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid/jquery-ui-1.7.1.custom.css" />\n)
       css << %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid//ui.jqgrid.css" />)
@@ -334,8 +333,8 @@ module Jqgrid
           options.chop! << %Q/",/
         elsif couple[0] == :data # :data => [Category.all, :id, :title])
           options << %Q/value:"/
-          couple[1].first.each do |v|
-            options << "#{v[couple[1].second]}:#{v[couple[1].third]};"
+          couple[1].first.each do |obj|
+            options << "%s:%s;" % [obj.send(couple[1].second), obj.send(couple[1].third)]
           end
           options.chop! << %Q/",/
         else # :size => 30, :rows => 5, :maxlength => 20, ...
