@@ -352,6 +352,8 @@ end
 
 
 module JqgridJson
+  include ActionView::Helpers::JavaScriptHelper
+
   def to_jqgrid_json(attributes, current_page, per_page, total)
     json = %Q({"page":"#{current_page}","total":#{total/per_page.to_i+1},"records":"#{total}")
     if total > 0
