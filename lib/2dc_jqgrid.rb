@@ -362,6 +362,7 @@ module JqgridJson
         couples = elem.attributes.symbolize_keys
         attributes.each do |atr|
           value = get_atr_value(elem, atr, couples)
+          value = escape_javascript(value) if value and value.is_a? String
           json << %Q("#{value}",)
         end
         json.chop! << "]},"
