@@ -1,1 +1,1 @@
-# Uninstall hook code here
+`rake jqgrid:uninstall`
