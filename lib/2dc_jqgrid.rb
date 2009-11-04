@@ -6,10 +6,11 @@ module Jqgrid
     end
 
     def jqgrid_javascripts
+      locale = I18n.locale rescue :en
       js = %Q(<script src="/jqgrid/js/jquery.js" type="text/javascript"></script>\n)
       js << %Q(<script src="/jqgrid/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>\n)
       js << %Q(<script src="/jqgrid/js/jquery.layout.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/i18n/grid.locale-en.js" type="text/javascript"></script>\n)
+      js << %Q(<script src="/jqgrid/js/i18n/grid.locale-#{locale}.js" type="text/javascript"></script>\n)
       js << %Q(<script src="/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>\n)
       js << %Q(<script src="/jqgrid/js/jquery.tablednd.js" type="text/javascript"></script>\n)
       js << %Q(<script src="/jqgrid/js/jquery.contextmenu.js" type="text/javascript"></script>)                    
