@@ -1,19 +1,19 @@
 module Jqgrid
     
     def jqgrid_stylesheets
-      css = %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid/jquery-ui-1.7.1.custom.css" />\n)
-      css << %Q(<link rel="stylesheet" type="text/css" media="screen" href="/jqgrid//ui.jqgrid.css" />)
+      css  = stylesheet_link_tag('jqgrid/jquery-ui-1.7.1.custom.css') + "\n"
+      css << stylesheet_link_tag('jqgrid/jqgrid/ui.jqgrid.css') + "\n"
     end
 
     def jqgrid_javascripts
       locale = I18n.locale rescue :en
-      js = %Q(<script src="/jqgrid/js/jquery.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/jquery-ui-1.7.1.custom.min.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/jquery.layout.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/i18n/grid.locale-#{locale}.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/jquery.tablednd.js" type="text/javascript"></script>\n)
-      js << %Q(<script src="/jqgrid/js/jquery.contextmenu.js" type="text/javascript"></script>)                    
+      js =  javascript_include_tag('jqgrid/jquery.js') + "\n"
+      js << javascript_include_tag('jqgrid/jquery-ui-1.7.1.custom.min.js') + "\n"
+      js << javascript_include_tag('jqgrid/jquery.layout.js') + "\n"
+      js << javascript_include_tag("jqgrid/i18n/grid.locale-#{locale}.js") + "\n"
+      js << javascript_include_tag('jqgrid/jquery.jqGrid.min.js') + "\n"
+      js << javascript_include_tag('jqgrid/jquery.tablednd.js') + "\n"
+      js << javascript_include_tag('jqgrid/jquery.contextmenu.js') + "\n"
     end
 
     def jqgrid(title, id, action, columns = [], options = {})
@@ -211,7 +211,7 @@ module Jqgrid
         			colModel: #{sub_col_model},
         		   	rowNum:#{options[:subgrid][:rows_per_page]},
         		   	pager: pager_id,
-        		   	imgpath: '/images/themes/lightness/images',
+        		   	imgpath: '/images/jqgrid',
         		   	sortname: '#{options[:subgrid][:sort_column]}',
         		    sortorder: '#{options[:subgrid][:sort_order]}',
                 viewrecords: true,
@@ -251,7 +251,7 @@ module Jqgrid
             pager: '##{id}_pager',
             rowNum:#{options[:rows_per_page]},
             rowList:[10,25,50,100],
-            imgpath: '/images/themes/lightness/images',
+            imgpath: '/images/jqgrid',
             sortname: '#{options[:sort_column]}',
             viewrecords: true,
             height: #{options[:height]},
