@@ -240,45 +240,47 @@ module Jqgrid
       # Generate required Javascript & html to create the jqgrid
       %Q(
         <script type="text/javascript">
-        var lastsel;
-        jQuery(document).ready(function(){
-        var mygrid = jQuery("##{id}").jqGrid({
-            url:'#{action}?q=1',
-            editurl:'#{options[:edit_url]}',
-            datatype: "json",
-            colNames:#{col_names},
-            colModel:#{col_model},
-            pager: '##{id}_pager',
-            rowNum:#{options[:rows_per_page]},
-            rowList:[10,25,50,100],
-            imgpath: '/images/jqgrid',
-            sortname: '#{options[:sort_column]}',
-            viewrecords: true,
-            height: #{options[:height]},
-            sortorder: '#{options[:sort_order]}',
-            gridview: #{options[:gridview]},
-            scrollrows: true,
-            autowidth: #{options[:autowidth]},
-            rownumbers: #{options[:rownumbers]},
-            #{multiselect}
-            #{masterdetails}
-            #{grid_loaded}
-            #{direct_link}
-            #{editable}
-            #{subgrid_enabled}
-            #{subgrid}
-            caption: "#{title}"
-        })
-        .navGrid('##{id}_pager',
-        {edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
-        {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'edit');}},
-        {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'add');}},
-        {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'delete');}})
-        #{search}
-        #{multihandler}
-        #{selection_link}
-        #{filter_toolbar}
-        });
+          var lastsel;
+          #{'jQuery(document).ready(function(){' unless options[:omit_ready]=='true'}
+          var mygrid = jQuery("##{id}")
+            .jqGrid({
+              url:'#{action}?q=1',
+              editurl:'#{options[:edit_url]}',
+              datatype: "json",
+              colNames:#{col_names},
+              colModel:#{col_model},
+              pager: '##{id}_pager',
+              rowNum:#{options[:rows_per_page]},
+              rowList:[10,25,50,100],
+              imgpath: '/images/jqgrid',
+              sortname: '#{options[:sort_column]}',
+              viewrecords: true,
+              height: #{options[:height]},
+              sortorder: '#{options[:sort_order]}',
+              gridview: #{options[:gridview]},
+              scrollrows: true,
+              autowidth: #{options[:autowidth]},
+              rownumbers: #{options[:rownumbers]},
+              #{multiselect}
+              #{masterdetails}
+              #{grid_loaded}
+              #{direct_link}
+              #{editable}
+              #{subgrid_enabled}
+              #{subgrid}
+              caption: "#{title}"
+            })
+            .navGrid('##{id}_pager',
+              {edit:#{edit_button},add:#{options[:add]},del:#{options[:delete]},search:false,refresh:true},
+              {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'edit');}},
+              {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'add');}},
+              {afterSubmit:function(r,data){return #{options[:error_handler_return_value]}(r,data,'delete');}}
+            )
+            #{search}
+            #{multihandler}
+            #{selection_link}
+            #{filter_toolbar}
+          #{'})' unless options[:omit_ready]=='true'};
         </script>
         <table id="#{id}" class="scroll" cellpadding="0" cellspacing="0"></table>
         <div id="#{id}_pager" class="scroll" style="text-align:center;"></div>
