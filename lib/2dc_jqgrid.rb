@@ -341,8 +341,8 @@ module Jqgrid
           options.chop! << %Q/",/
         elsif couple[0] == :data # :data => [Category.all, :id, :title])
           options << %Q/value:"/
-          couple[1].first.each do |v|
-            options << "#{v[couple[1].second]}:#{v[couple[1].third]};"
+          couple[1].first.each do |obj|
+            options << "%s:%s;" % [obj.send(couple[1].second), obj.send(couple[1].third)]
           end
           options.chop! << %Q/",/
         else # :size => 30, :rows => 5, :maxlength => 20, ...
@@ -359,6 +359,8 @@ end
 
 
 module JqgridJson
+  include ActionView::Helpers::JavaScriptHelper
+
   def to_jqgrid_json(attributes, current_page, per_page, total)
     json = %Q({"page":"#{current_page}","total":#{total/per_page.to_i+1},"records":"#{total}")
     if total > 0
@@ -369,6 +371,7 @@ module JqgridJson
         couples = elem.attributes.symbolize_keys
         attributes.each do |atr|
           value = get_atr_value(elem, atr, couples)
+          value = escape_javascript(value) if value and value.is_a? String
           json << %Q("#{value}",)
         end
         json.chop! << "]},"
