@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'spec'
 require 'active_support'
+require 'action_view' # ugly but temporary
 
 require File.dirname(__FILE__) + '/../lib/2dc_jqgrid'
 Array.send :include, JqgridJson
