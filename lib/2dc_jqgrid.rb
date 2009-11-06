@@ -5,7 +5,7 @@ module Jqgrid
 
     def jqgrid_stylesheets
       css  = stylesheet_link_tag('jqgrid/jquery-ui-1.7.1.custom.css') + "\n"
-      css << stylesheet_link_tag('jqgrid/jqgrid/ui.jqgrid.css') + "\n"
+      css << stylesheet_link_tag('jqgrid/ui.jqgrid.css') + "\n"
     end
 
     def jqgrid_javascripts
