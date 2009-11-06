@@ -246,8 +246,7 @@ module Jqgrid
         <script type="text/javascript">
           var lastsel;
           #{'jQuery(document).ready(function(){' unless options[:omit_ready]=='true'}
-          var mygrid = jQuery("##{id}")
-            .jqGrid({
+          var mygrid = jQuery("##{id}").jqGrid({
               url:'#{action}?q=1',
               editurl:'#{options[:edit_url]}',
               datatype: "json",

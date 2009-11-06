@@ -1,5 +1,4 @@
-2dcJqgrid
-=========
+= 2dcJqgrid
 
 This Rails plugin allows you to add jQuery datagrids into your applications.
 
@@ -17,8 +16,12 @@ Following features are supported :
 
 Documentation & live demo are available at http://www.2dconcept.com/jquery-grid-rails-plugin
 
-Enjoy!
 
+= Generator
+
+You can now generate a grid using a command like this one :
+
+  $ ./script/generate jqgrid user id pseudo email firstname
 
 
 Copyright (c) 2009 Anthony Heukmes, released under the MIT license
