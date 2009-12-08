@@ -15,7 +15,7 @@ Following features are supported :
 - And more ...
 
 Documentation & live demo are available at http://www.2dconcept.com/jquery-grid-rails-plugin
-
+A sample app is available here : http://github.com/ahe/jqgrid_demo_app
 
 = Generator
 
