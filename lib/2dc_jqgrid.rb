@@ -158,87 +158,96 @@ module Jqgrid
 
         subgrid_enabled = "subGrid:true,"
 
-        options[:subgrid] =
-          {
-            :rows_per_page => '10',
-            :sort_column   => 'id',
-            :sort_order    => 'asc',
-            :add           => 'false',
-            :edit          => 'false',
-            :delete        => 'false',
-            :search        => 'false'
-          }.merge(options[:subgrid])
+        if options[:subgrid][:expand_function].present?
+          expand_func = options[:subgrid][:expand_function]
+          collapse_func = options[:subgrid][:colapse_function] || "function(subgrid_id, row_id) {}"
+          subgrid = %Q(
+            subGridRowExpanded: '#{expand_func}',
+            subGridRowColapsed: '#{collapse_func}',
+            )
+        else
+          options[:subgrid] =
+            {
+              :rows_per_page => '10',
+              :sort_column   => 'id',
+              :sort_order    => 'asc',
+              :add           => 'false',
+              :edit          => 'false',
+              :delete        => 'false',
+              :search        => 'false'
+            }.merge(options[:subgrid])
 
-        # Stringify options values
-        options[:subgrid].inject({}) do |suboptions, (key, value)|
-          suboptions[key] = value.to_s
-          suboptions
+          # Stringify options values
+          options[:subgrid].inject({}) do |suboptions, (key, value)|
+            suboptions[key] = value.to_s
+            suboptions
+          end
+
+          subgrid_inline_edit = ""
+          if options[:subgrid][:inline_edit] == true
+            options[:subgrid][:edit] = 'false'
+            subgrid_inline_edit = %Q/
+            onSelectRow: function(id){
+              if(id && id!==lastsel){
+                jQuery('#'+subgrid_table_id).restoreRow(lastsel);
+                jQuery('#'+subgrid_table_id).editRow(id,true);
+                lastsel=id;
+              }
+            },
+            /
+          end
+
+          if options[:subgrid][:direct_selection] && options[:subgrid][:selection_handler].present?
+            subgrid_direct_link = %Q/
+            onSelectRow: function(id){
+              if(id){
+                #{options[:subgrid][:selection_handler]}(id);
+              }
+            },
+            /
+          end
+
+          sub_col_names, sub_col_model = gen_columns(options[:subgrid][:columns])
+
+          subgrid = %Q(
+          subGridRowExpanded: function(subgrid_id, row_id) {
+                          var subgrid_table_id, pager_id;
+                          subgrid_table_id = subgrid_id+"_t";
+                          pager_id = "p_"+subgrid_table_id;
+                          $("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+                          jQuery("#"+subgrid_table_id).jqGrid({
+                                  url:"#{options[:subgrid][:url]}?q=2&id="+row_id,
+                editurl:'#{options[:subgrid][:edit_url]}?parent_id='+row_id,
+                                  datatype: "json",
+                                  colNames: #{sub_col_names},
+                                  colModel: #{sub_col_model},
+                                  rowNum:#{options[:subgrid][:rows_per_page]},
+                                  pager: pager_id,
+                                  imgpath: '/images/jqgrid',
+                                  sortname: '#{options[:subgrid][:sort_column]}',
+                              sortorder: '#{options[:subgrid][:sort_order]}',
+                  viewrecords: true,
+                  toolbar : [true,"top"],
+                              #{subgrid_inline_edit}
+                              #{subgrid_direct_link}
+                              height: '100%'
+                          })
+                          .navGrid("#"+pager_id,{edit:#{options[:subgrid][:edit]},add:#{options[:subgrid][:add]},del:#{options[:subgrid][:delete]},search:false})
+                          .navButtonAdd("#"+pager_id,{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
+                  onClickButton:function(){
+                          if(jQuery("#t_"+subgrid_table_id).css("display")=="none") {
+                                  jQuery("#t_"+subgrid_table_id).css("display","");
+                          } else {
+                                  jQuery("#t_"+subgrid_table_id).css("display","none");
+                          }
+                  }
+              });
+              jQuery("#t_"+subgrid_table_id).height(25).hide().filterGrid(""+subgrid_table_id,{gridModel:true,gridToolbar:true});
+                  },
+                  subGridRowColapsed: function(subgrid_id, row_id) {
+                  },
+          )
         end
-
-        subgrid_inline_edit = ""
-        if options[:subgrid][:inline_edit] == true
-          options[:subgrid][:edit] = 'false'
-          subgrid_inline_edit = %Q/
-          onSelectRow: function(id){
-            if(id && id!==lastsel){
-              jQuery('#'+subgrid_table_id).restoreRow(lastsel);
-              jQuery('#'+subgrid_table_id).editRow(id,true);
-              lastsel=id;
-            }
-          },
-          /
-        end
-
-        if options[:subgrid][:direct_selection] && options[:subgrid][:selection_handler].present?
-          subgrid_direct_link = %Q/
-          onSelectRow: function(id){
-            if(id){
-              #{options[:subgrid][:selection_handler]}(id);
-            }
-          },
-          /
-        end
-
-        sub_col_names, sub_col_model = gen_columns(options[:subgrid][:columns])
-
-        subgrid = %Q(
-        subGridRowExpanded: function(subgrid_id, row_id) {
-        		var subgrid_table_id, pager_id;
-        		subgrid_table_id = subgrid_id+"_t";
-        		pager_id = "p_"+subgrid_table_id;
-        		$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
-        		jQuery("#"+subgrid_table_id).jqGrid({
-        			url:"#{options[:subgrid][:url]}?q=2&id="+row_id,
-              editurl:'#{options[:subgrid][:edit_url]}?parent_id='+row_id,
-        			datatype: "json",
-        			colNames: #{sub_col_names},
-        			colModel: #{sub_col_model},
-        		   	rowNum:#{options[:subgrid][:rows_per_page]},
-        		   	pager: pager_id,
-        		   	imgpath: '/images/jqgrid',
-        		   	sortname: '#{options[:subgrid][:sort_column]}',
-        		    sortorder: '#{options[:subgrid][:sort_order]}',
-                viewrecords: true,
-                toolbar : [true,"top"],
-        		    #{subgrid_inline_edit}
-        		    #{subgrid_direct_link}
-        		    height: '100%'
-        		})
-        		.navGrid("#"+pager_id,{edit:#{options[:subgrid][:edit]},add:#{options[:subgrid][:add]},del:#{options[:subgrid][:delete]},search:false})
-        		.navButtonAdd("#"+pager_id,{caption:"Search",title:"Toggle Search",buttonimg:'/images/jqgrid/search.png',
-            	onClickButton:function(){
-            		if(jQuery("#t_"+subgrid_table_id).css("display")=="none") {
-            			jQuery("#t_"+subgrid_table_id).css("display","");
-            		} else {
-            			jQuery("#t_"+subgrid_table_id).css("display","none");
-            		}
-            	}
-            });
-            jQuery("#t_"+subgrid_table_id).height(25).hide().filterGrid(""+subgrid_table_id,{gridModel:true,gridToolbar:true});
-        	},
-        	subGridRowColapsed: function(subgrid_id, row_id) {
-        	},
-        )
       end
 
       # Generate required Javascript & html to create the jqgrid
