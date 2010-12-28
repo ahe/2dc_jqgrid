@@ -160,10 +160,10 @@ module Jqgrid
 
         if options[:subgrid][:expand_function].present?
           expand_func = options[:subgrid][:expand_function]
-          collapse_func = options[:subgrid][:colapse_function] || "function(subgrid_id, row_id) {}"
+          collapse_func = options[:subgrid][:colapse_function].present? "'#{options[:subgrid][:colapse_function]}'" : "function(subgrid_id, row_id) {}"
           subgrid = %Q(
             subGridRowExpanded: '#{expand_func}',
-            subGridRowColapsed: '#{collapse_func}',
+            subGridRowColapsed: #{collapse_func},
             )
         else
           options[:subgrid] =
